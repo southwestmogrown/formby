@@ -1,1 +1,11 @@
-export {}
+import SignupForm from '@/components/auth/SignupForm'
+
+export const metadata = { title: 'Sign up — AI Form Builder' }
+
+export default function SignupPage() {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <SignupForm />
+    </main>
+  )
+}
