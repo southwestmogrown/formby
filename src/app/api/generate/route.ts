@@ -119,6 +119,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (!isDemo && !apiKey) {
+    return NextResponse.json(
+      { error: 'An Anthropic API key is required. Add yours in the dashboard banner.' },
+      { status: 400 }
+    )
+  }
+
   let demoIp: string | null = null
   if (isDemo && !apiKey) {
     const ip = getClientIp(request)

@@ -24,6 +24,11 @@ function makeRequest(body: unknown, ip = '1.2.3.4'): NextRequest {
   })
 }
 
+// Authenticated (non-demo) requests require an API key
+function makeAuthRequest(description: string, ip = '1.2.3.4'): NextRequest {
+  return makeRequest({ description, apiKey: 'sk-ant-test' }, ip)
+}
+
 const validClaudeResponse = JSON.stringify({
   name: 'Contact Form',
   fields: [
@@ -57,13 +62,13 @@ describe('POST /api/generate', () => {
 
   it('accepts description of exactly 10 characters', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
-    const res = await POST(makeRequest({ description: '1234567890' }))
+    const res = await POST(makeAuthRequest('1234567890'))
     expect(res.status).toBe(200)
   })
 
   it('returns 200 with parsed response when Claude returns valid JSON', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }))
+    const res = await POST(makeAuthRequest('A simple contact form with name and email'))
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.name).toBe('Contact Form')
@@ -73,7 +78,7 @@ describe('POST /api/generate', () => {
 
   it('strips leading/trailing whitespace from description before calling Claude', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
-    await POST(makeRequest({ description: '  A simple contact form with name and email  ' }))
+    await POST(makeRequest({ description: '  A simple contact form with name and email  ', apiKey: 'sk-ant-test' }))
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: [{ role: 'user', content: 'A simple contact form with name and email' }],
@@ -83,34 +88,34 @@ describe('POST /api/generate', () => {
 
   it('returns 500 when Claude returns non-JSON text', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: 'Sure! Here is your form...' }] })
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }))
+    const res = await POST(makeAuthRequest('A simple contact form with name and email'))
     expect(res.status).toBe(500)
     expect((await res.json()).error).toMatch(/parse/i)
   })
 
   it('returns 500 when Claude returns JSON missing required fields', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: JSON.stringify({ unexpected: true }) }] })
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }))
+    const res = await POST(makeAuthRequest('A simple contact form with name and email'))
     expect(res.status).toBe(500)
     expect((await res.json()).error).toMatch(/shape/i)
   })
 
   it('returns 500 when fields is not an array', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: JSON.stringify({ name: 'Form', fields: 'oops' }) }] })
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }))
+    const res = await POST(makeAuthRequest('A simple contact form with name and email'))
     expect(res.status).toBe(500)
   })
 
   it('returns 502 when Anthropic throws', async () => {
     mockCreate.mockRejectedValue(new Error('API key invalid'))
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }))
+    const res = await POST(makeAuthRequest('A simple contact form with name and email'))
     expect(res.status).toBe(502)
   })
 
   it('does not rate-limit non-demo requests regardless of count', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
     for (let i = 0; i < 5; i++) {
-      const res = await POST(makeRequest({ description: 'A simple contact form with name and email' }, '5.5.5.5'))
+      const res = await POST(makeAuthRequest('A simple contact form with name and email', '5.5.5.5'))
       expect(res.status).toBe(200)
     }
   })

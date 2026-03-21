@@ -8,7 +8,12 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
-import NewFormPage from '../page'
+// Mock apiKey — return a stored key so generate isn't disabled
+vi.mock('@/lib/apiKey', () => ({
+  getApiKey: () => 'sk-ant-test',
+}))
+
+import NewFormPage from '../NewFormPage'
 
 const generatedFields = [
   { id: 'name', type: 'text', label: 'Full Name', required: true },
@@ -42,7 +47,7 @@ beforeEach(() => {
 
 describe('NewFormPage', () => {
   it('renders in empty phase showing PromptInput and no field list', () => {
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
     // The textarea is the description input; it has a placeholder but no explicit accessible name
     expect(screen.getAllByRole('textbox')[0]).toBeInTheDocument()
     // In empty phase, the generated-state controls (Save Draft, Publish) are absent
@@ -51,14 +56,14 @@ describe('NewFormPage', () => {
   })
 
   it('shows the page heading in empty phase', () => {
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
     expect(screen.getByRole('heading', { name: /create a new form/i })).toBeInTheDocument()
   })
 
   it('transitions to generated phase after successful generation', async () => {
     const user = userEvent.setup()
     mockSuccessfulGenerate()
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
 
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
@@ -72,7 +77,7 @@ describe('NewFormPage', () => {
   it('shows FieldList and FormPreview in generated phase', async () => {
     const user = userEvent.setup()
     mockSuccessfulGenerate()
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
 
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
@@ -89,7 +94,7 @@ describe('NewFormPage', () => {
   it('clicking Regenerate goes back to empty phase', async () => {
     const user = userEvent.setup()
     mockSuccessfulGenerate()
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
 
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
@@ -106,7 +111,7 @@ describe('NewFormPage', () => {
   it('Save Draft POSTs with published: false and redirects to /forms/[id]', async () => {
     const user = userEvent.setup()
     mockSuccessfulSave('form-xyz')
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
 
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
@@ -130,7 +135,7 @@ describe('NewFormPage', () => {
   it('Publish POSTs with published: true and redirects to /forms/[id]/embed', async () => {
     const user = userEvent.setup()
     mockSuccessfulSave('form-xyz')
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
 
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
@@ -163,7 +168,7 @@ describe('NewFormPage', () => {
       })
     )
 
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
 
@@ -189,7 +194,7 @@ describe('NewFormPage', () => {
       .mockImplementationOnce(() => new Promise(() => {})) // Never resolves
     )
 
-    render(<NewFormPage />)
+    render(<NewFormPage userId="test-user-id" />)
     await user.type(screen.getAllByRole('textbox')[0], 'A contact form with name and email')
     await user.click(screen.getByRole('button', { name: /generate form/i }))
 

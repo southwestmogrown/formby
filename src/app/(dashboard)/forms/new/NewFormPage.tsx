@@ -1,0 +1,146 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import type { FormField } from '@/lib/types'
+import PromptInput from '@/components/builder/PromptInput'
+import FieldList from '@/components/builder/FieldList'
+import FormPreview from '@/components/builder/FormPreview'
+import { getApiKey } from '@/lib/apiKey'
+
+type Phase = 'empty' | 'generated'
+
+export default function NewFormPage({ userId }: { userId: string }) {
+  const router = useRouter()
+  const [phase, setPhase] = useState<Phase>('empty')
+  const [formName, setFormName] = useState('')
+  const [description, setDescription] = useState('')
+  const [fields, setFields] = useState<FormField[]>([])
+  const [savingAs, setSavingAs] = useState<'draft' | 'publish' | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    setApiKey(getApiKey(userId))
+  }, [userId])
+
+  function handleGenerate(newFields: FormField[], name: string, desc: string) {
+    setFields(newFields)
+    setFormName(name)
+    setDescription(desc)
+    setPhase('generated')
+  }
+
+  async function handleSave(published: boolean) {
+    if (savingAs !== null) return
+    setSavingAs(published ? 'publish' : 'draft')
+    setSaveError(null)
+
+    try {
+      const res = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: formName, description, fields, published }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setSaveError(data.error ?? 'Failed to save form. Please try again.')
+        setSavingAs(null)
+        return
+      }
+
+      if (published) {
+        router.push(`/forms/${data.id}/embed`)
+      } else {
+        router.push(`/forms/${data.id}`)
+      }
+    } catch {
+      setSaveError('Network error. Please try again.')
+      setSavingAs(null)
+    }
+  }
+
+  if (phase === 'empty') {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
+        <div className="w-full max-w-xl">
+          <h1 className="text-2xl font-semibold text-ink mb-2">Create a new form</h1>
+          <p className="text-sm text-ink-2 mb-8">
+            Describe what your form should collect and we&apos;ll generate it instantly.
+          </p>
+          <PromptInput
+            onGenerate={handleGenerate}
+            initialDescription={description}
+            apiKey={apiKey ?? undefined}
+            disabled={apiKey === null}
+          />
+          {apiKey === null && (
+            <p className="mt-3 text-sm text-bill font-medium">
+              Add your Anthropic API key in the banner above to enable generation.
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col flex-1 min-h-0">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-border px-6 py-3 bg-white min-h-[56px]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setPhase('empty')}
+            className="text-sm text-ink-muted hover:text-brand transition-colors"
+          >
+            ← Regenerate
+          </button>
+          <input
+            type="text"
+            value={formName}
+            onChange={(e) => setFormName(e.target.value)}
+            placeholder="Form name"
+            aria-label="Form name"
+            className="text-base font-semibold text-ink border-b border-transparent focus:border-brand focus:outline-none bg-transparent px-1"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          {saveError && (
+            <p role="alert" className="text-sm text-red-600 mr-2">
+              {saveError}
+            </p>
+          )}
+          <button
+            onClick={() => handleSave(false)}
+            disabled={savingAs !== null}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink-2 hover:bg-surface disabled:opacity-50 transition-colors"
+          >
+            {savingAs === 'draft' ? 'Saving…' : 'Save Draft'}
+          </button>
+          <button
+            onClick={() => handleSave(true)}
+            disabled={savingAs !== null}
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
+          >
+            {savingAs === 'publish' ? 'Publishing…' : 'Publish'}
+          </button>
+        </div>
+      </div>
+
+      {/* Split layout */}
+      <div className="flex flex-col md:flex-row flex-1">
+        <div className="w-full md:w-1/2 overflow-y-auto border-b md:border-b-0 md:border-r border-border p-4 md:p-6">
+          <h2 className="text-sm font-medium text-ink-muted mb-4 uppercase tracking-wide">Fields</h2>
+          <FieldList fields={fields} onChange={setFields} />
+        </div>
+        <div className="w-full md:w-1/2 overflow-y-auto p-4 md:p-6 bg-surface">
+          <h2 className="text-sm font-medium text-ink-muted mb-4 uppercase tracking-wide">Preview</h2>
+          <FormPreview fields={fields} name={formName} />
+        </div>
+      </div>
+    </div>
+  )
+}
