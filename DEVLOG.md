@@ -294,6 +294,8 @@ Formby character = Gumby (warm grass green, rubbery, friendly) × Bill from Scho
 
 **Post-ship bug:** `LoginForm.tsx` still pushed to `'/'` after successful login — landed users on the landing page instead of the dashboard. Fixed `router.push('/')` → `router.push('/forms')`. Commit: `fix: redirect to /forms after login`
 
+**Post-ship bug:** `Header.tsx` logo always linked to `'/'` — logged-in users clicking it hit the landing page. Fixed with `href={user ? '/forms' : '/'}`. Commit: `fix: logo links to /forms when logged in, / when logged out`
+
 ### Patterns established
 - Auth: `createClient()` → `getUser()` → 401 if null; no `user_id` filter (RLS handles ownership)
 - Errors: always `{ error: 'message' }` JSON
