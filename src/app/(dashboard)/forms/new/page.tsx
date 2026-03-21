@@ -15,7 +15,7 @@ export default function NewFormPage() {
   const [formName, setFormName] = useState('')
   const [description, setDescription] = useState('')
   const [fields, setFields] = useState<FormField[]>([])
-  const [isSaving, setIsSaving] = useState(false)
+  const [savingAs, setSavingAs] = useState<'draft' | 'publish' | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   function handleGenerate(newFields: FormField[], name: string, desc: string) {
@@ -26,8 +26,8 @@ export default function NewFormPage() {
   }
 
   async function handleSave(published: boolean) {
-    if (isSaving) return
-    setIsSaving(true)
+    if (savingAs !== null) return
+    setSavingAs(published ? 'publish' : 'draft')
     setSaveError(null)
 
     try {
@@ -46,6 +46,7 @@ export default function NewFormPage() {
 
       if (!res.ok) {
         setSaveError(data.error ?? 'Failed to save form. Please try again.')
+        setSavingAs(null)
         return
       }
 
@@ -56,8 +57,7 @@ export default function NewFormPage() {
       }
     } catch {
       setSaveError('Network error. Please try again.')
-    } finally {
-      setIsSaving(false)
+      setSavingAs(null)
     }
   }
 
@@ -73,7 +73,10 @@ export default function NewFormPage() {
           <p className="text-sm text-zinc-500 mb-8">
             Describe what your form should collect and we&apos;ll generate it instantly.
           </p>
-          <PromptInput onGenerate={handleGenerate} initialDescription={description} />
+          <PromptInput
+            onGenerate={handleGenerate}
+            initialDescription={description}
+          />
         </div>
       </div>
     )
@@ -82,7 +85,7 @@ export default function NewFormPage() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-3 bg-white">
+      <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-3 bg-white min-h-[56px]">
         <div className="flex items-center gap-3">
           <button
             onClick={handleRegenerate}
@@ -108,28 +111,28 @@ export default function NewFormPage() {
           )}
           <button
             onClick={() => handleSave(false)}
-            disabled={isSaving}
+            disabled={savingAs !== null}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
           >
-            {isSaving ? 'Saving…' : 'Save Draft'}
+            {savingAs === 'draft' ? 'Saving…' : 'Save Draft'}
           </button>
           <button
             onClick={() => handleSave(true)}
-            disabled={isSaving}
+            disabled={savingAs !== null}
             className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors"
           >
-            {isSaving ? 'Publishing…' : 'Publish'}
+            {savingAs === 'publish' ? 'Publishing…' : 'Publish'}
           </button>
         </div>
       </div>
 
       {/* Split layout: FieldList left, FormPreview right */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <div className="w-1/2 overflow-y-auto border-r border-zinc-200 p-6">
+      <div className="flex flex-col md:flex-row flex-1">
+        <div className="w-full md:w-1/2 overflow-y-auto border-b md:border-b-0 md:border-r border-zinc-200 p-4 md:p-6">
           <h2 className="text-sm font-medium text-zinc-500 mb-4 uppercase tracking-wide">Fields</h2>
           <FieldList fields={fields} onChange={setFields} />
         </div>
-        <div className="w-1/2 overflow-y-auto p-6 bg-zinc-50">
+        <div className="w-full md:w-1/2 overflow-y-auto p-4 md:p-6 bg-zinc-50">
           <h2 className="text-sm font-medium text-zinc-500 mb-4 uppercase tracking-wide">Preview</h2>
           <FormPreview fields={fields} name={formName} />
         </div>

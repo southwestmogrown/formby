@@ -85,7 +85,7 @@ export default function PromptInput({
         onClick={handleGenerate}
         disabled={!canGenerate}
         aria-busy={isLoading}
-        className="self-end flex items-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-zinc-700 transition-colors"
+        className="self-end flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-zinc-700 transition-colors min-w-[150px]"
       >
         {isLoading ? (
           <>

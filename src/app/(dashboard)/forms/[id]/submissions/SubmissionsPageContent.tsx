@@ -33,15 +33,21 @@ export default function SubmissionsPageContent({ form, submissions }: Submission
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
     const a = document.createElement('a')
     a.href = url
-    a.download = 'submissions.csv'
+    a.download = `${form.name.replace(/[^a-z0-9_-]/gi, '_')}-submissions.csv`
     a.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
   }
 
   return (
     <div>
       <div className="mb-4">
-        <button onClick={handleExportCSV}>Export CSV</button>
+        <button
+          onClick={handleExportCSV}
+          disabled={submissions.length === 0}
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Export CSV
+        </button>
       </div>
       <SubmissionTable fields={form.fields} submissions={submissions} />
     </div>

@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import FormCard from '@/components/dashboard/FormCard'
 import type { Form } from '@/lib/types'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'My Forms' }
 
 export default async function Page() {
   const supabase = await createClient()
