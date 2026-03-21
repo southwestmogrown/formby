@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isDashboardRoute = pathname.startsWith('/forms') || pathname === '/'
+  const isDashboardRoute = pathname.startsWith('/forms')
   const isAuthRoute = pathname === '/login' || pathname === '/signup'
 
   if (!user && isDashboardRoute) {
@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest) {
 
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/forms'
     return NextResponse.redirect(url)
   }
 

@@ -71,7 +71,7 @@ export default function EditFormPage({ form }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-6 py-3 bg-white min-h-[56px]">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm text-ink-muted hover:text-brand transition-colors">
+          <Link href="/forms" className="text-sm text-ink-muted hover:text-brand transition-colors">
             ← My Forms
           </Link>
           <input

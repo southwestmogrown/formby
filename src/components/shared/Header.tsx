@@ -13,6 +13,7 @@ export default async function Header() {
       </Link>
       {user && (
         <div className="flex items-center gap-4">
+          <Link href="/forms" className="text-sm text-ink-2 hover:text-ink transition-colors">My Forms</Link>
           <span className="text-sm text-ink-muted">{user.email}</span>
           <SignOutButton />
         </div>

@@ -1,6 +1,6 @@
 import LoginForm from '@/components/auth/LoginForm'
 
-export const metadata = { title: 'Log in — AI Form Builder' }
+export const metadata = { title: 'Log in — Formby' }
 
 export default function LoginPage() {
   return (

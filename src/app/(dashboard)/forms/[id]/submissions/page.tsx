@@ -35,7 +35,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/" className="text-sm text-ink-muted hover:text-brand transition-colors">← My Forms</Link>
+        <Link href="/forms" className="text-sm text-ink-muted hover:text-brand transition-colors">← My Forms</Link>
         <Link href={`/forms/${id}/embed`} className="text-sm text-ink-muted hover:text-brand transition-colors">Embed settings</Link>
       </div>
       <h1 className="text-2xl font-bold text-ink mb-6">{form.name} — Submissions</h1>
