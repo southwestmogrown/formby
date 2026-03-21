@@ -8,7 +8,6 @@ export default function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [confirmed, setConfirmed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -17,13 +16,7 @@ export default function SignupForm() {
     setIsLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${location.origin}/forms`,
-      },
-    })
+    const { error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       setError(error.message)
@@ -31,20 +24,7 @@ export default function SignupForm() {
       return
     }
 
-    setConfirmed(true)
-    setIsLoading(false)
-  }
-
-  if (confirmed) {
-    return (
-      <div className="flex flex-col gap-4 w-full max-w-sm text-center">
-        <h1 className="text-2xl font-semibold text-ink">Check your email</h1>
-        <p className="text-ink-2 text-sm">
-          We sent a confirmation link to <strong>{email}</strong>.
-          Click the link to activate your account.
-        </p>
-      </div>
-    )
+    window.location.href = '/forms'
   }
 
   return (
