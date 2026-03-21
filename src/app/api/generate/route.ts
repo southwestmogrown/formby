@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import type { GenerateRequest, GenerateResponse } from '@/lib/types'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const SYSTEM_PROMPT = `You are an expert form designer. Given a description of a form, return a single valid JSON object — nothing else. No explanation, no markdown, no code fences. The response must be parseable by JSON.parse() or the application breaks.
 
@@ -101,9 +102,6 @@ Generate every field a real form of this type would need — do not under-genera
 - Survey: 6–12 fields
 Never generate redundant fields or fields that obviously do not belong to the form type.`
 
-// In-memory rate limit store: IP → count. Lives for the process lifetime.
-const demoUsage = new Map<string, number>()
-
 function getClientIp(request: NextRequest): string {
   return request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
 }
@@ -138,19 +136,20 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let demoIp: string | null = null
   if (isDemo && !apiKey) {
     const ip = getClientIp(request)
     const limit = parseInt(process.env.DEMO_GENERATION_LIMIT ?? '3', 10)
-    const used = demoUsage.get(ip) ?? 0
-    if (used >= limit) {
+    const admin = createAdminClient()
+    const { data: newCount, error: rpcError } = await admin.rpc('increment_demo_usage', { ip_addr: ip })
+    if (rpcError) {
+      console.error('demo_usage RPC error:', rpcError)
+      // Fail open — don't block the user if the DB call fails
+    } else if (newCount > limit) {
       return NextResponse.json(
         { error: 'Demo generation limit reached. Sign up to continue.' },
         { status: 429 }
       )
     }
-    // Store IP to increment after a successful generation (not before)
-    demoIp = ip
   }
 
   const client = apiKey
@@ -191,11 +190,6 @@ export async function POST(request: NextRequest) {
       { error: 'AI response does not match expected shape' },
       { status: 500 }
     )
-  }
-
-  // Only count a demo generation after we have a valid successful response
-  if (demoIp !== null) {
-    demoUsage.set(demoIp, (demoUsage.get(demoIp) ?? 0) + 1)
   }
 
   return NextResponse.json(parsed)

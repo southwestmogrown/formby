@@ -1,13 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 
-// vi.hoisted ensures mockCreate is available when vi.mock factory runs (hoisting)
+// vi.hoisted ensures mocks are available when vi.mock factory runs (hoisting)
 const mockCreate = vi.hoisted(() => vi.fn())
+const mockRpc = vi.hoisted(() => vi.fn())
 
 vi.mock('@anthropic-ai/sdk', () => ({
   default: class MockAnthropic {
     messages = { create: mockCreate }
   },
+}))
+
+// Mock admin client — rpc tracks per-IP counts in memory for tests
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({ rpc: mockRpc }),
 }))
 
 // Import AFTER mocks are set up
@@ -39,6 +45,8 @@ const validClaudeResponse = JSON.stringify({
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // Default: RPC returns count=1 (first use, under any reasonable limit)
+  mockRpc.mockResolvedValue({ data: 1, error: null })
 })
 
 describe('POST /api/generate', () => {
@@ -122,15 +130,11 @@ describe('POST /api/generate', () => {
 
   it('returns 429 for demo requests that exceed the limit', async () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
-    const ip = '9.9.9.1'
     const limit = parseInt(process.env.DEMO_GENERATION_LIMIT ?? '3', 10)
+    // Simulate RPC returning a count that exceeds the limit
+    mockRpc.mockResolvedValue({ data: limit + 1, error: null })
 
-    for (let i = 0; i < limit; i++) {
-      const res = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, ip))
-      expect(res.status).toBe(200)
-    }
-
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, ip))
+    const res = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, '9.9.9.1'))
     expect(res.status).toBe(429)
     expect((await res.json()).error).toMatch(/limit/i)
   })
@@ -139,12 +143,14 @@ describe('POST /api/generate', () => {
     mockCreate.mockResolvedValue({ content: [{ type: 'text', text: validClaudeResponse }] })
     const limit = parseInt(process.env.DEMO_GENERATION_LIMIT ?? '3', 10)
 
-    for (let i = 0; i < limit; i++) {
-      await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, '10.0.0.1'))
-    }
+    // First IP is over limit
+    mockRpc.mockResolvedValueOnce({ data: limit + 1, error: null })
+    const blockedRes = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, '10.0.0.1'))
+    expect(blockedRes.status).toBe(429)
 
-    // Different IP should still be allowed
-    const res = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, '10.0.0.2'))
-    expect(res.status).toBe(200)
+    // Second IP is under limit — should pass
+    mockRpc.mockResolvedValueOnce({ data: 1, error: null })
+    const allowedRes = await POST(makeRequest({ description: 'A simple contact form with name and email', isDemo: true }, '10.0.0.2'))
+    expect(allowedRes.status).toBe(200)
   })
 })
