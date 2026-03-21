@@ -42,17 +42,19 @@ export async function PUT(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: Record<string, unknown>
+  let body: { name?: unknown; fields?: unknown; published?: unknown; webhook_url?: unknown }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
+  const { name, fields, published, webhook_url } = body
   const { data, error } = await supabase
     .from('forms')
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update({ name, fields, published, webhook_url, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single()
 
@@ -77,10 +79,15 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  await supabase
+  const { error, count } = await supabase
     .from('forms')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error || !count) {
+    return NextResponse.json({ error: 'Form not found' }, { status: 404 })
+  }
 
   return new Response(null, { status: 204 })
 }

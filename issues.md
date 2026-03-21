@@ -765,6 +765,100 @@ chore: set page titles and favicon
 
 ---
 
+### #18 — Logout and dashboard header
+**Labels:** `feature`
+**Milestone:** M5 — Demo Mode + Polish + Ship
+
+The dashboard has no persistent header and no way to log out. `Header.tsx`
+is currently an empty stub. Implement it and wire it into the dashboard
+layout.
+
+**Header.tsx** — server component. Shows the app name ("Formby") on the
+left and the logged-in user's email + a Sign Out button on the right.
+Sign Out calls Supabase `signOut()` via a small client action and redirects
+to `/login`.
+
+**app/(dashboard)/layout.tsx** — import and render `<Header />` above
+`{children}` so it appears on every dashboard page.
+
+**Acceptance criteria**
+- Header visible on all dashboard pages (forms list, edit, embed, submissions)
+- App name links to `/`
+- User email displayed
+- Sign Out button signs the user out and redirects to `/login`
+- Header does not appear on `/login` or `/signup`
+
+**Commits**
+```
+feat: add dashboard header with logout
+```
+
+---
+
+### #19 — Form edit page
+**Labels:** `feature`
+**Milestone:** M5 — Demo Mode + Polish + Ship
+
+`app/(dashboard)/forms/[id]/page.tsx` currently returns `null`. It should
+load the existing form and render the full builder UI pre-populated with
+the saved fields, allowing the user to edit and save changes.
+
+**Behaviour:**
+- Server component fetches the form via Supabase; calls `notFound()` if
+  missing or not owned by the user
+- Renders a client component (`EditFormPage`) that mirrors the `generated`
+  phase of `forms/new/page.tsx` — header with form name input, FieldList
+  left, FormPreview right
+- Save button PUTs to `/api/forms/[id]` with updated name, fields,
+  description, and published status
+- Publish/Unpublish toggle — if form is a draft the button says "Publish";
+  if already published it says "Unpublish"
+- Redirect to `/forms/[id]/embed` after publishing; stay on page after
+  saving a draft (show a transient "Saved" confirmation)
+- Back link to `/` (forms list)
+
+**Acceptance criteria**
+- Page loads with existing fields and name populated
+- All edits (field add/remove/reorder/edit, name change) are saveable
+- Publish/Unpublish toggle works and reflects current state
+- Save shows inline confirmation; publish redirects to embed page
+- `notFound()` called for unknown or unowned form IDs
+- `generateMetadata` sets title to form name
+
+**Commits**
+```
+feat: implement form edit page
+```
+
+---
+
+### #20 — Delete form from dashboard
+**Labels:** `feature`
+**Milestone:** M5 — Demo Mode + Polish + Ship
+
+There is no way to delete a form. Add a Delete button to `FormCard` that
+calls `DELETE /api/forms/[id]` and removes the card from the list without
+a full page reload.
+
+**FormCard** needs to become a client component (or extract a thin client
+wrapper) to handle the delete interaction. Show a confirmation before
+deleting ("Delete this form and all its submissions?"). Optimistically
+remove the card on confirm; restore it if the API call fails.
+
+**Acceptance criteria**
+- Delete button visible on each FormCard
+- Confirmation prompt shown before deletion
+- Card removed from list immediately on confirm
+- Error shown and card restored if DELETE fails
+- DELETE `/api/forms/[id]` already implemented (M3); no API changes needed
+
+**Commits**
+```
+feat: add delete form button to FormCard
+```
+
+---
+
 ### #17 — Write README and deploy to production
 **Labels:** `docs`
 **Milestone:** M5 — Demo Mode + Polish + Ship

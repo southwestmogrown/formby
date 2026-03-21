@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Form } from '@/lib/types'
+import DeleteFormButton from './DeleteFormButton'
 
 interface FormCardProps {
   form: Form & { submissions: [{ count: number }] }
@@ -43,6 +44,7 @@ export default function FormCard({ form }: FormCardProps) {
         <Link href={`/forms/${form.id}/submissions`} className="text-zinc-700 hover:underline font-medium">
           Submissions
         </Link>
+        <DeleteFormButton formId={form.id} formName={form.name} />
       </div>
     </div>
   )
