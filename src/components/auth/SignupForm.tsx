@@ -28,8 +28,8 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
-      <h1 className="text-2xl font-semibold text-ink">Create an account</h1>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+      <h1 className="text-xl font-semibold text-ink">Create your account</h1>
 
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-ink-2">Email</label>
