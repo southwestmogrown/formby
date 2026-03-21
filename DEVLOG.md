@@ -130,6 +130,92 @@ Submit route:
 
 ---
 
+---
+
+## M4 — Webhooks + History
+
+### What was built
+- `src/app/(dashboard)/page.tsx` — forms list dashboard with `FormCard` grid, submission count, Published/Draft badges
+- `src/components/dashboard/FormCard.tsx` — card with name, status badge, submission count, created date, Edit/Embed/Submissions links
+- `src/app/(dashboard)/forms/[id]/submissions/page.tsx` — submissions dashboard, server component
+- `src/app/(dashboard)/forms/[id]/submissions/SubmissionsPageContent.tsx` — client wrapper with `SubmissionTable` and Export CSV
+- `src/components/dashboard/SubmissionTable.tsx` — table rendering jsonb submission data with column headers derived from form fields
+- Webhook settings and test endpoint already implemented in M3
+
+### Bugs caught in review
+- **Export CSV filename hardcoded**: always produced `submissions.csv`. Fixed to sanitize form name.
+- **`URL.revokeObjectURL` race condition**: synchronous revoke after `a.click()` could fire before download started. Fixed with `setTimeout(..., 100)`.
+
+### Test count at M4 completion
+155 tests (no new tests — UI-only additions).
+
+---
+
+## M5 — Demo Mode + Polish
+
+### Issue #16 — Polish pass
+
+**What was fixed:**
+- Root layout title updated from "Create Next App" to `title.template: '%s — Formby'`
+- Added `metadata` exports to dashboard page, forms/new (via thin layout.tsx), embed page, and submissions page
+- Mobile-responsive split layout (`flex-col md:flex-row`) on forms/new and forms/[id]
+- Favicon via `src/app/icon.tsx` — `ImageResponse`, 32×32, zinc-900 "F" monogram
+- Export CSV button styled with Tailwind classes, `disabled` when no submissions
+- PromptInput Generate button stabilised with `min-w-[150px] justify-center` to prevent resize during loading
+- Embed page and submissions page use `cache()`-wrapped `getForm` to deduplicate Supabase queries between `generateMetadata` and page component
+
+**Key decisions:**
+- `{ absolute: '...' }` title used on embed/submissions to bypass template (prevents double em-dash)
+- Thin `forms/new/layout.tsx` needed because `forms/new/page.tsx` is a client component and cannot export metadata directly
+- Generating skeleton (show field placeholders during AI call) was prototyped but reverted — it unmounted PromptInput during the API call, causing error messages to be lost. The spinner in the button already satisfies the "no layout shift" AC.
+
+**Commit:** `fix: add loading states and error handling throughout` + `chore: set page titles and favicon`
+
+### Infrastructure fixes (session)
+- `src/proxy.ts`: renamed from `middleware.ts`, export renamed `middleware` → `proxy` per Next.js 16.2.0 convention
+- `.env.example`: real Supabase keys sanitised to placeholder strings
+- `supabase/migrations/20260321000000_init.sql`: migration file documenting tables, indexes, triggers, RLS policies
+- `src/app/api/generate/route.ts`: system prompt rewritten from 16 lines to 90 lines — field ordering rules, type selection rules, label/placeholder/options quality rules, form completeness targets by type
+- `src/app/embed/[formId]/widget.js/route.ts`: widget.js script tag embed route implemented (was shown in UI but unimplemented). Self-invoking JS, `Content-Type: application/javascript`, CORS headers.
+
+### Issue #18 — Logout + dashboard header
+
+**What was built:**
+- `src/components/shared/Header.tsx`: async server component — fetches user, renders "Formby" logo link + user email + `<SignOutButton />`
+- `src/components/shared/SignOutButton.tsx`: `'use client'` component, calls `supabase.auth.signOut()` then `router.push('/login')`
+- `src/app/(dashboard)/layout.tsx`: updated to render `<Header />` above children in `flex flex-col min-h-screen`
+
+**Review:** PASS first pass.
+
+### Issue #19 — Form edit page
+
+**What was built:**
+- `src/app/(dashboard)/forms/[id]/page.tsx`: server component with `cache()`-wrapped `getForm`, `generateMetadata`, renders `<EditFormPage form={form} />`
+- `src/app/(dashboard)/forms/[id]/EditFormPage.tsx`: client component with `formName`, `fields`, `savingAs`, `saveError`, `savedAt`, `isPublished` state. Save Draft / Publish-Unpublish toggle. `router.refresh()` before `router.push()` on publish to invalidate router cache. `aria-busy` on buttons, `role="status"` on save confirmation.
+
+**Bugs caught in review (three passes):**
+- First pass: missing `cache()` on server page, `setTimeout` memory leak in timer for "Saved" confirmation, stale `form.published` prop used for Publish/Unpublish label
+- Second pass: `api/forms/[id]/route.ts` PUT had no `user_id` filter and spread unvalidated body into Supabase update; blank-name guard missing; buttons missing `aria-busy`; success message missing `role="status"`
+
+**Review:** PASS third pass.
+
+### Issue #20 — Delete form from dashboard
+
+**What was built:**
+- `src/components/dashboard/DeleteFormButton.tsx`: two-click confirmation (Delete → Confirm + Cancel), inline error display while confirming stays open, `mountedRef` guard, `type="button"`, `aria-label` with form name context
+- `src/components/dashboard/FormCard.tsx`: wires in `<DeleteFormButton formId={form.id} formName={form.name} />`
+- `src/app/api/forms/[id]/route.ts` DELETE: uses `{ count: 'exact' }` and `!count` guard to return 404 when no row was deleted (covers both `count === 0` and `count === null`)
+
+**Bugs caught in review (three passes):**
+- First pass: DELETE route silently returned 204 on non-existent/foreign form; body spread on PUT unvalidated; no aria-labels; error state was dead end
+- Second pass: error message was silently swallowed — `setConfirming(false)` was called on error paths, hiding the confirming branch where the error renders; `count === 0` guard didn't cover `count === null`
+
+**Review:** PASS third pass.
+
+**Commit:** `feat: add logout header, form edit page, and delete form (#18 #19 #20)`
+
+---
+
 ## Summary
 
 | Milestone | Tests | Key files |
@@ -137,6 +223,8 @@ Submit route:
 | M1 | 112 | middleware, auth forms, dashboard layout, CI |
 | M2 | 112 | generate API, form builder UI, forms CRUD |
 | M3 | 155 | forms/[id] CRUD, embed HTML, submit API, embed page UI |
+| M4 | 155 | forms list dashboard, submissions dashboard, CSV export |
+| M5 | 155 | polish, header/logout, form edit, delete form |
 
 ### Patterns established
 - Auth: `createClient()` → `getUser()` → 401 if null; no `user_id` filter (RLS handles ownership)
@@ -147,3 +235,8 @@ Submit route:
 - Vitest mocks: `vi.hoisted()` for all mocks; imports after `vi.mock()` calls
 - Controlled input tests: use stateful wrapper components (`renderStateful`) or `fireEvent.change` for single-shot value setting
 - Fake timers + async state: use `fireEvent` + `act(async () => {})` rather than `userEvent` with `advanceTimers`
+- Client mutations in server-component pages: create a separate `'use client'` component; on success call `router.refresh()` to re-fetch the server component
+- Metadata on client pages: create a thin `layout.tsx` in the same segment to export metadata
+- Deduplicating server queries: wrap with `cache()` from React — shared between `generateMetadata` and page component within a single request
+- API ownership: always add `.eq('user_id', user.id)` to mutation queries as defence-in-depth alongside RLS; use `{ count: 'exact' }` on DELETE and check `!count` to detect no-match
+- Body allowlisting: never spread `req.json()` directly into Supabase update — destructure only the expected fields
