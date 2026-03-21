@@ -265,6 +265,33 @@ Formby character = Gumby (warm grass green, rubbery, friendly) × Bill from Scho
 
 **Future work:** Formby character as chat assistant (foliochat integration) planned for later milestone.
 
+### Issue #22 (M5+) — Landing page + routing fix
+
+**What was built:**
+- `src/app/page.tsx` — full marketing landing page at `/` (was previously blank / redirect to login):
+  - Sticky nav: Formby logo + Log in + Get started CTA
+  - Two-column hero: copy + product mockup (static illustration showing prompt → generated form)
+  - "How it works" 3-step section on warm surface background with numbered brand-green circles
+  - 2×2 features grid (AI generation, submissions, webhooks, embed)
+  - Full-bleed brand-green CTA band: "Stop building forms by hand."
+  - Minimal footer
+- Forms list moved from `/` to `/forms` (file renamed `(dashboard)/page.tsx` → `(dashboard)/forms/page.tsx`)
+- `src/proxy.ts`: removed `/` from `isDashboardRoute`; auth page redirect now sends to `/forms`
+- `Header.tsx`: logo → `/` (landing), added "My Forms" → `/forms` for logged-in users
+- "← My Forms" back links in EditFormPage and submissions updated to `/forms`
+- Auth page titles: "Log in — Formby" / "Sign up — Formby"
+
+**Key design decisions:**
+- Hero right column is a static JSX mockup (not a live demo) — shows "before/after" without requiring API calls
+- Mock "Generate Form →" button has `aria-hidden="true"` since it looks interactive but is purely decorative
+- CTA copy: "Stop building forms by hand. Create your first AI-generated form in 30 seconds. Free, forever."
+
+**Review findings:**
+- First pass FAIL: route conflict — `(dashboard)/page.tsx` and `app/page.tsx` both resolved to `/`. The stub was deleted (its redirect to `/forms` was already covered by proxy.ts for authenticated users).
+- Second pass PASS.
+
+**Commit:** `feat: add landing page and move dashboard to /forms`
+
 ### Patterns established
 - Auth: `createClient()` → `getUser()` → 401 if null; no `user_id` filter (RLS handles ownership)
 - Errors: always `{ error: 'message' }` JSON
