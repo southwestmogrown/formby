@@ -34,10 +34,11 @@ export default function LandingPage() {
             <Link href="/signup" className="rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white hover:bg-brand-dark transition-colors shadow-sm">
               Start building free →
             </Link>
-            <Link href="/login" className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-ink-2 hover:bg-surface transition-colors">
-              Log in
+            <Link href="/demo" className="rounded-lg border border-border px-6 py-3 text-sm font-medium text-ink-2 hover:bg-surface transition-colors">
+              Try demo · no signup
             </Link>
           </div>
+          <p className="mt-3 text-xs text-ink-muted">3 free generations · No credit card · Or bring your own Anthropic key</p>
         </div>
 
         <div className="flex flex-col gap-3">

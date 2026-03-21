@@ -1,5 +1,5 @@
 import { describe, it, expectTypeOf } from 'vitest'
-import type { FieldType, FormField, Form, Submission, GenerateRequest, GenerateResponse, DemoSession } from '../types'
+import type { FieldType, FormField, Form, Submission, GenerateRequest, GenerateResponse } from '../types'
 
 describe('types', () => {
   it('FieldType covers all supported input types', () => {
@@ -40,11 +40,7 @@ describe('types', () => {
     expectTypeOf(demoReq).toMatchTypeOf<GenerateRequest>()
   })
 
-  it('DemoSession generationsUsed is a number', () => {
-    expectTypeOf<DemoSession['generationsUsed']>().toBeNumber()
-  })
-
-  it('GenerateResponse has name and fields', () => {
+it('GenerateResponse has name and fields', () => {
     expectTypeOf<GenerateResponse>().toHaveProperty('name')
     expectTypeOf<GenerateResponse>().toHaveProperty('fields')
   })

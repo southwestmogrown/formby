@@ -14,6 +14,7 @@ interface PromptInputProps {
   onGenerate: (fields: FormField[], name: string, description: string) => void
   initialDescription?: string
   isDemo?: boolean
+  apiKey?: string
   demoGenerationsRemaining?: number
   disabled?: boolean
 }
@@ -22,6 +23,7 @@ export default function PromptInput({
   onGenerate,
   initialDescription = '',
   isDemo,
+  apiKey,
   demoGenerationsRemaining,
   disabled,
 }: PromptInputProps) {
@@ -40,7 +42,7 @@ export default function PromptInput({
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: description.trim(), isDemo }),
+        body: JSON.stringify({ description: description.trim(), isDemo, apiKey }),
       })
 
       const data = await res.json()

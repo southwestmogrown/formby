@@ -46,6 +46,7 @@ export interface Submission {
 export interface GenerateRequest {
   description: string;
   isDemo?: boolean;
+  apiKey?: string;
 }
 
 // Response from /api/generate
@@ -54,8 +55,3 @@ export interface GenerateResponse {
   fields: FormField[];
 }
 
-// Demo session stored in sessionStorage
-export interface DemoSession {
-  generationsUsed: number;  // max 3
-  startedAt: string;
-}

@@ -25,9 +25,9 @@ describe('EmbedCodeBlock', () => {
     expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders script code containing /embed/the-form-id.js', () => {
+  it('renders script code containing /embed/the-form-id/widget.js', () => {
     render(<EmbedCodeBlock formId="the-form-id" />)
-    expect(screen.getByText(/\/embed\/the-form-id\.js/)).toBeInTheDocument()
+    expect(screen.getByText(/\/embed\/the-form-id\/widget\.js/)).toBeInTheDocument()
   })
 
   it('renders two copy buttons', () => {

@@ -49,8 +49,18 @@ beforeEach(() => {
   mockSingle.mockResolvedValue({ data: formData, error: null })
   mockEq.mockReturnValue({ single: mockSingle, select: mockSelect })
   mockSelect.mockReturnValue({ eq: mockEq, single: mockSingle })
-  mockUpdate.mockReturnValue({ eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingle }) }) })
-  mockDelete.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+  // PUT chain: update() -> eq('id') -> eq('user_id') -> select() -> single()
+  mockUpdate.mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingle }) }),
+    }),
+  })
+  // DELETE chain: delete({ count }) -> eq('id') -> eq('user_id') -> resolves { error, count }
+  mockDelete.mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null, count: 1 }),
+    }),
+  })
 
   mockFrom.mockReturnValue({
     select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: mockSingle }) }),
@@ -101,12 +111,15 @@ describe('PUT /api/forms/[id]', () => {
   })
 
   it('returns 404 when Supabase returns error', async () => {
-    const mockEqChain = vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: null, error: new Error('not found') }),
+    mockUpdate.mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: null, error: new Error('not found') }),
+          }),
+        }),
       }),
     })
-    mockUpdate.mockReturnValue({ eq: mockEqChain })
     mockFrom.mockReturnValue({
       select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: mockSingle }) }),
       update: mockUpdate,

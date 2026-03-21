@@ -9,6 +9,10 @@ vi.mock('next/link', () => ({
     <a href={href} {...props}>{children}</a>
 }))
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+}))
+
 const sampleForm: Form & { submissions: [{ count: number }] } = {
   id: 'form-1',
   user_id: 'user-1',

@@ -104,7 +104,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { description, isDemo } = body
+  const { description, isDemo, apiKey } = body
+
+  if (apiKey !== undefined && apiKey !== null) {
+    if (typeof apiKey !== 'string' || !apiKey.startsWith('sk-ant-')) {
+      return NextResponse.json({ error: 'Invalid API key format' }, { status: 400 })
+    }
+  }
 
   if (!description || description.trim().length < 10) {
     return NextResponse.json(
@@ -114,7 +120,7 @@ export async function POST(request: NextRequest) {
   }
 
   let demoIp: string | null = null
-  if (isDemo) {
+  if (isDemo && !apiKey) {
     const ip = getClientIp(request)
     const limit = parseInt(process.env.DEMO_GENERATION_LIMIT ?? '3', 10)
     const used = demoUsage.get(ip) ?? 0
@@ -128,7 +134,9 @@ export async function POST(request: NextRequest) {
     demoIp = ip
   }
 
-  const client = new Anthropic()
+  const client = apiKey
+    ? new Anthropic({ apiKey })
+    : new Anthropic()
 
   let text: string
   try {
