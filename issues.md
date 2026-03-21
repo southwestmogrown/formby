@@ -36,6 +36,7 @@ view submissions dashboard, and configure webhooks.
 | M3 — Embed + Submissions | End of Day 3 |
 | M4 — Webhooks + History | End of Day 4 |
 | M5 — Demo Mode + Polish + Ship | End of Day 5 |
+| M6 — Growth Features | TBD |
 
 ---
 
@@ -888,4 +889,247 @@ DEMO_GENERATION_LIMIT=3
 ```
 docs: add README with setup, embed docs, and project context
 chore: configure all production environment variables
+```
+
+---
+
+## M6 — Growth Features
+
+### #24 — Password reset flow
+**Labels:** `auth`
+**Milestone:** M6 — Growth Features
+
+Users who forget their password have no recovery path. Implement the full
+reset flow using Supabase's built-in password recovery.
+
+**Flow:**
+1. "Forgot password?" link on the login page
+2. `/forgot-password` page — email input, submits `supabase.auth.resetPasswordForEmail()`
+3. User receives email with a magic link pointing to `/reset-password`
+4. `/reset-password` page — new password input, calls `supabase.auth.updateUser({ password })`
+5. On success, redirect to `/forms`
+
+Both pages follow the existing modal-style auth layout (dark backdrop, centered card).
+
+**Acceptance criteria**
+- "Forgot password?" link visible on login modal
+- Email input page sends reset email via Supabase
+- Reset page accepts new password and confirms update
+- Both pages use the existing `(auth)/layout.tsx` modal chrome
+- Invalid or expired reset links show a clear error message
+- Successful reset redirects to `/forms`
+
+**Commits**
+```
+feat: add forgot-password and reset-password pages
+```
+
+---
+
+### #25 — Submission rate limiting
+**Labels:** `security`
+**Milestone:** M6 — Growth Features
+
+`/api/submit/[formId]` is completely open — anyone can flood a published form
+with submissions. Add per-IP rate limiting using the same `demo_usage` pattern
+(Supabase-backed, atomic, survives cold starts).
+
+**Implementation:**
+- New `submit_usage` table: `ip text`, `form_id text`, `count int`, `window_start timestamptz`
+- Postgres RPC `check_submit_rate(ip_addr, form_id, max_per_hour)` — returns `allowed boolean`
+- Limit: 20 submissions per IP per form per hour (configurable via env var `SUBMIT_RATE_LIMIT`)
+- Returns 429 with a clear message if exceeded
+
+**Acceptance criteria**
+- Legitimate single submissions always go through
+- 21st submission from the same IP to the same form within an hour returns 429
+- Different forms have independent limits
+- Different IPs have independent limits
+- Rate limit resets after the window expires
+
+**Commits**
+```
+feat: add per-IP rate limiting to /api/submit
+```
+
+---
+
+### #26 — Duplicate form
+**Labels:** `feature`
+**Milestone:** M6 — Growth Features
+
+Users frequently want to create a variation of a form they've already built.
+Add a one-click duplicate action to `FormCard`.
+
+**Behaviour:**
+- "Duplicate" button on each `FormCard` (next to Delete)
+- POSTs to `/api/forms` with the existing form's `name + " (copy)"`, same `fields` and `description`, `published: false`
+- On success, redirects to `/forms/[new-id]` so the user can immediately edit
+- Duplicate is always created as a draft regardless of the original's status
+
+**API:** reuses existing `POST /api/forms` — no new endpoint needed.
+
+**Acceptance criteria**
+- Duplicate button visible on every FormCard
+- New form created with "(copy)" suffix and all fields intact
+- New form always starts as a draft
+- Redirect to edit page of the new form on success
+- Error shown inline if the API call fails
+- Loading state on button during the request
+
+**Commits**
+```
+feat: add duplicate form action to FormCard
+```
+
+---
+
+### #27 — Custom success message
+**Labels:** `feature`
+**Milestone:** M6 — Growth Features
+
+After a form is submitted, the embed currently shows a hardcoded
+"Thank you! Your response has been recorded." Let form owners set their own
+message.
+
+**Schema change:** add `success_message text` column to `forms` table (nullable,
+defaults to the hardcoded string).
+
+**UI:** add a "Success message" text input to the embed settings page
+(`/forms/[id]/embed`), below the webhook URL. Saves on blur via
+`PUT /api/forms/[id]`.
+
+**Embed renderer:** use `form.success_message ?? 'Thank you! Your response has been recorded.'`
+
+**Acceptance criteria**
+- Success message field visible on embed page
+- Saves correctly and persists across page refreshes
+- Embed renderer displays the custom message after submission
+- Falls back to default when field is empty
+
+**Commits**
+```
+feat: add custom success message to form settings and embed renderer
+```
+
+---
+
+### #28 — Email notifications on submission
+**Labels:** `feature`
+**Milestone:** M6 — Growth Features
+
+Form owners expect to receive an email when someone submits their form.
+Webhooks technically cover this but email is the default expectation.
+
+**Implementation using Resend** (or any transactional email provider):
+- Add `RESEND_API_KEY` env var
+- On successful submission in `/api/submit/[formId]`, send an email to the form owner
+- Email shows: form name, submission timestamp, all field labels + values
+- Send is fire-and-forget — a failed email must not fail the submission response
+
+**Schema:** look up `profiles.email` for the form's `user_id` to get the
+owner's email address.
+
+**Acceptance criteria**
+- Form owner receives an email within ~10 seconds of a submission
+- Email shows all submitted field values with labels
+- Failed email send does not affect the 201 submission response
+- No email sent if `RESEND_API_KEY` is not configured (graceful degradation)
+
+**Commits**
+```
+feat: add email notification on form submission via Resend
+```
+
+---
+
+### #29 — Conditional field logic
+**Labels:** `feature`
+**Milestone:** M6 — Growth Features
+
+Show or hide fields based on the value of a previous field. This is the
+feature that separates a toy form builder from a real one.
+
+**Scope (v1 — single condition per field):**
+- Each `FormField` gains an optional `condition` property:
+  ```typescript
+  condition?: {
+    fieldId: string      // which field to watch
+    operator: 'equals' | 'not_equals' | 'contains'
+    value: string        // the trigger value
+  }
+  ```
+- Fields with a `condition` are hidden by default and shown when the condition is met
+- Supported trigger field types: `select`, `radio`, `checkbox` (single boolean)
+
+**UI in FieldEditor:**
+- "Show this field when…" toggle — reveals a condition builder
+- Dropdown to pick the source field (only shows compatible field types above current field)
+- Operator dropdown (`is`, `is not`, `contains`)
+- Value input
+
+**FormPreview:** evaluates conditions reactively as the user fills in the preview.
+
+**Embed renderer:** evaluates conditions in the vanilla JS submit handler, showing/hiding fields as values change.
+
+**Generate prompt:** update system prompt to describe the `condition` property
+so Claude can generate conditional fields when the description implies branching
+(e.g. "show the details field only if the user selects Yes").
+
+**Acceptance criteria**
+- Condition builder visible in FieldEditor for any field that isn't the first
+- FormPreview correctly shows/hides conditional fields in real time
+- Embed renderer shows/hides fields dynamically as user types
+- Hidden fields are excluded from required validation and submission data
+- Generate prompt produces valid `condition` objects for branching descriptions
+- Existing forms without conditions are unaffected
+
+**Commits**
+```
+feat: add condition property to FormField type and FieldEditor UI
+feat: evaluate conditions in FormPreview and embed renderer
+feat: update generate prompt to support conditional fields
+```
+
+---
+
+### #30 — Formby character assistant
+**Labels:** `feature`, `ai`
+**Milestone:** M6 — Growth Features
+
+Formby is a character — a mix of Gumby and Bill from Schoolhouse Rock. The
+app should have a conversational assistant that embodies this character and
+guides users through the product: explaining features, helping with prompts,
+and answering questions about their forms.
+
+**Implementation using FolioChat** (adapted from the existing FolioChat project):
+- Floating chat button (bottom-right corner) on all dashboard pages
+- Character voice: enthusiastic, helpful, slightly goofy — not a generic
+  "How can I help you today?" bot
+- Aware of current page context (forms list, builder, submissions, embed)
+- Can suggest prompt ideas, explain field types, walk through publishing, etc.
+- System prompt defines Formby's personality and product knowledge
+
+**Phase 1 — static knowledge:**
+- Formby knows the product (all features, field types, embed, webhooks, etc.)
+- Does not have access to the user's actual form data
+- Answers questions, gives suggestions, keeps users unblocked
+
+**Phase 2 — context-aware (stretch):**
+- Pass current form fields/name to Formby so it can give specific advice
+  ("Your form has 12 fields, that might be too many — want me to suggest which
+  to cut?")
+
+**Acceptance criteria (Phase 1)**
+- Chat button visible on all dashboard pages
+- Opens a drawer/modal with Formby's chat interface
+- Responds in character with relevant, helpful answers
+- Handles common questions: "how do I embed?", "what's a webhook?",
+  "can you suggest a prompt for a contact form?"
+- Loading state while waiting for response
+- Mobile-friendly
+
+**Commits**
+```
+feat: add Formby character assistant with FolioChat integration
 ```

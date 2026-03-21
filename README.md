@@ -150,6 +150,18 @@ src/
 
 ---
 
+## Roadmap
+
+- [ ] **Password reset** — forgot password flow via Supabase email recovery
+- [ ] **Submission rate limiting** — per-IP cap on `/api/submit` to prevent flooding
+- [ ] **Duplicate form** — one-click copy of any existing form
+- [ ] **Custom success message** — form owners set what users see after submitting
+- [ ] **Email notifications** — email the form owner on each new submission
+- [ ] **Conditional logic** — show/hide fields based on previous answers
+- [ ] **Formby assistant** — an in-app character (Gumby meets Bill from Schoolhouse Rock) that guides users through the product and answers questions in plain English
+
+---
+
 ## Deployment
 
 Deploy to Vercel in one step — framework is auto-detected. Add the five environment variables from above, then add your production URL to Supabase under **Authentication → URL Configuration → Redirect URLs**.
