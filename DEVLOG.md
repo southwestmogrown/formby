@@ -225,6 +225,45 @@ Submit route:
 | M3 | 155 | forms/[id] CRUD, embed HTML, submit API, embed page UI |
 | M4 | 155 | forms list dashboard, submissions dashboard, CSV export |
 | M5 | 155 | polish, header/logout, form edit, delete form |
+| M5+ | 155 | Formby brand identity — green + warm palette, SubmissionTable restyle |
+
+### Issue #21 (M5+) — Formby Brand Identity
+
+**Procedure followed:** ui-ux-designer skill from `/skills/SKILL_ui-ux-designer.md`
+
+**Design brief:**
+Formby character = Gumby (warm grass green, rubbery, friendly) × Bill from Schoolhouse Rocks (earnest, golden yellow, approachable). Not corporate. Not dark. Warm and alive.
+
+**Design tokens defined in `globals.css` `@theme inline`:**
+- `--color-brand: #3D8B4E` — Formby green (primary buttons, links, focus rings)
+- `--color-brand-light: #EBF5EE` — light green (table header, hover states, success badges)
+- `--color-brand-dark: #2D6B3C` — button hover state
+- `--color-bill: #E8A020` — Bill yellow (Published badge)
+- `--color-bill-light: #FEF3D0` — Published badge background
+- `--color-surface: #FAFAF7` — warm off-white page background (was `#ffffff`)
+- `--color-border: #E4E7DE` — warm, green-tinted borders
+- `--color-ink: #1A2416` — dark warm green-black for primary text
+- `--color-ink-2: #4A5540` — secondary text
+- `--color-ink-muted: #8A9680` — muted text, timestamps
+
+**Most impactful changes:**
+- `globals.css`: background `#FAFAF7`, font fixed from `Arial` to `var(--font-geist-sans)`, dark mode block removed, all tokens registered
+- `SubmissionTable.tsx`: was completely bare `<table>` with zero CSS. Replaced with: `bg-brand-light` header row, alternating `bg-surface`/`bg-white` rows, `hover:bg-brand-light/40` row hover, monospace timestamps in `text-ink-muted`, styled empty state with dashed border and helpful sub-message
+- All primary buttons: `bg-zinc-900` → `bg-brand hover:bg-brand-dark`
+- All focus rings: `ring-zinc-900` → `ring-brand`
+- All borders: `border-zinc-*` → `border-border`
+- `FormCard`: hover-border-brand, Published badge in Bill yellow, Draft badge in brand-light green
+- Empty states: styled with dashed border and brand-green CTA (was just bare `<p>`)
+- Auth forms: brand button, warm background, Geist sans font now rendering correctly
+- Favicon: zinc-900 background → brand green
+
+**Review findings (2 passes):**
+- First pass FAIL: 5 leftover zinc- classes in FieldList (drag handle + add-field button), FieldEditor (delete icon), PromptInput (textarea border), DeleteFormButton (cancel link). Fixed.
+- Second pass PASS.
+
+**Commit:** `feat: apply Formby brand identity — Gumby green meets Bill yellow`
+
+**Future work:** Formby character as chat assistant (foliochat integration) planned for later milestone.
 
 ### Patterns established
 - Auth: `createClient()` → `getUser()` → 401 if null; no `user_id` filter (RLS handles ownership)
