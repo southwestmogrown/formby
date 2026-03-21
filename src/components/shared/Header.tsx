@@ -8,7 +8,7 @@ export default async function Header() {
 
   return (
     <header className="border-b border-border bg-white px-6 py-3 flex items-center justify-between">
-      <Link href="/" className="text-lg font-bold text-brand hover:text-brand-dark transition-colors">
+      <Link href={user ? '/forms' : '/'} className="text-lg font-bold text-brand hover:text-brand-dark transition-colors">
         Formby
       </Link>
       {user && (
