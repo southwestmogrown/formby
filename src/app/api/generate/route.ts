@@ -74,6 +74,18 @@ const SYSTEM_PROMPT = `You are an expert form designer. Given a description of a
 - Good uses: file format requirements, character limits, clarification of an ambiguous question
 - Bad uses: restating the label, generic filler like "Please fill this in carefully"
 
+## How Fields Render (critical — do not violate)
+
+Understanding how each type renders prevents broken layouts:
+
+- **text / email / phone / number / date / textarea** → label above, full-width input below. No options.
+- **select** → label above, dropdown below. options array is the list of choices. required: true means user must pick.
+- **radio** → label above, then each option renders as "( ) Option text" on its own line. Use for mutually exclusive choices. **options array is mandatory** — a radio without options renders nothing useful.
+- **checkbox with options** → label above, then each option renders as "[_] Option text" on its own line. Use for multi-select. **options array is mandatory.**
+- **checkbox without options** → renders as a single "[_] Full sentence label" — no separate label above. Use ONLY for boolean consent/agreement/certification statements. The label field IS the full sentence (e.g. "I agree to the terms and conditions"). Never use this for questions that have multiple answers.
+
+**Never generate a radio or multi-select checkbox without an options array — it will render as an empty broken field.**
+
 ## Required vs Optional
 
 - required: true for fields essential to process the submission

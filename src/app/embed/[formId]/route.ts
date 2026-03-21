@@ -27,48 +27,52 @@ function renderField(field: FormField): string {
 
   switch (field.type) {
     case 'textarea':
-      return `<div class="field"><label>${label}${requiredStar}</label><textarea name="${escapeHtml(field.id)}" rows="3"${placeholder}${requiredAttr}></textarea></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><textarea name="${escapeHtml(field.id)}" rows="3"${placeholder}${requiredAttr}></textarea></div>`
 
     case 'select': {
       if (!field.options || field.options.length === 0) {
-        return `<div class="field"><label>${label}${requiredStar}</label><select name="${escapeHtml(field.id)}"${requiredAttr}><option value="">${escapeHtml(field.placeholder || 'Select an option')}</option></select></div>`
+        return `<div class="field"><label class="field-label">${label}${requiredStar}</label><select name="${escapeHtml(field.id)}"${requiredAttr}><option value="">${escapeHtml(field.placeholder || 'Select an option')}</option></select></div>`
       }
       const options = field.options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('\n')
-      return `<div class="field"><label>${label}${requiredStar}</label><select name="${escapeHtml(field.id)}"${requiredAttr}>\n<option value="">Select an option</option>\n${options}\n</select></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><select name="${escapeHtml(field.id)}"${requiredAttr}>\n<option value="">Select an option</option>\n${options}\n</select></div>`
     }
 
     case 'radio': {
       if (!field.options || field.options.length === 0) {
-        return `<div class="field"><label>${label}${requiredStar}</label><p>No options defined yet.</p></div>`
+        return `<div class="field"><label class="field-label">${label}${requiredStar}</label><p>No options defined.</p></div>`
       }
-      const radios = field.options.map(opt => `<label><input type="radio" name="${escapeHtml(field.id)}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label>`).join('\n')
-      return `<div class="field"><label>${label}${requiredStar}</label>\n${radios}\n</div>`
+      const radios = field.options.map(opt =>
+        `<label class="option-label"><input type="radio" name="${escapeHtml(field.id)}" value="${escapeHtml(opt)}"><span>${escapeHtml(opt)}</span></label>`
+      ).join('\n')
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><div class="options">\n${radios}\n</div></div>`
     }
 
     case 'checkbox': {
       if (field.options && field.options.length > 0) {
-        const checkboxes = field.options.map(opt => `<label><input type="checkbox" name="${escapeHtml(field.id)}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label>`).join('\n')
-        return `<div class="field"><label>${label}${requiredStar}</label>\n${checkboxes}\n</div>`
+        const checkboxes = field.options.map(opt =>
+          `<label class="option-label"><input type="checkbox" name="${escapeHtml(field.id)}" value="${escapeHtml(opt)}"><span>${escapeHtml(opt)}</span></label>`
+        ).join('\n')
+        return `<div class="field"><label class="field-label">${label}${requiredStar}</label><div class="options">\n${checkboxes}\n</div></div>`
       } else {
-        return `<div class="field"><label><input type="checkbox" name="${escapeHtml(field.id)}"${requiredAttr}> ${label}${field.required ? ' *' : ''}</label></div>`
+        return `<div class="field"><label class="option-label"><input type="checkbox" name="${escapeHtml(field.id)}"${requiredAttr}><span>${label}${field.required ? ' <span style="color:red">*</span>' : ''}</span></label></div>`
       }
     }
 
     case 'email':
-      return `<div class="field"><label>${label}${requiredStar}</label><input type="email" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><input type="email" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
 
     case 'phone':
-      return `<div class="field"><label>${label}${requiredStar}</label><input type="tel" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><input type="tel" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
 
     case 'number':
-      return `<div class="field"><label>${label}${requiredStar}</label><input type="number" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><input type="number" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
 
     case 'date':
-      return `<div class="field"><label>${label}${requiredStar}</label><input type="date" name="${escapeHtml(field.id)}"${requiredAttr}></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><input type="date" name="${escapeHtml(field.id)}"${requiredAttr}></div>`
 
     case 'text':
     default:
-      return `<div class="field"><label>${label}${requiredStar}</label><input type="text" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
+      return `<div class="field"><label class="field-label">${label}${requiredStar}</label><input type="text" name="${escapeHtml(field.id)}"${placeholder}${requiredAttr}></div>`
   }
 }
 
@@ -86,9 +90,12 @@ function generateHtml(form: { id: string; name: string; fields: FormField[] }): 
 <style>
 body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; color: #111; }
 .field { margin-bottom: 20px; }
-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-input, textarea, select { display: block; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; padding: 8px 12px; font-size: 14px; }
-button[type=submit] { background: #111; color: #fff; border: none; border-radius: 4px; padding: 10px 20px; font-size: 14px; cursor: pointer; }
+.field-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+input:not([type=checkbox]):not([type=radio]), textarea, select { display: block; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; padding: 8px 12px; font-size: 14px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: normal; cursor: pointer; }
+.option-label input { width: 16px; height: 16px; margin: 0; flex-shrink: 0; }
+button[type=submit] { background: #111; color: #fff; border: none; border-radius: 4px; padding: 10px 20px; font-size: 14px; cursor: pointer; margin-top: 8px; }
 .error { color: red; margin-top: 8px; font-size: 14px; }
 .success { color: green; font-size: 16px; margin-top: 20px; }
 </style>
