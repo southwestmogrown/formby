@@ -13,7 +13,7 @@ export default function EmbedCodeBlock({ formId }: EmbedCodeBlockProps) {
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   const iframeCode = `<iframe src="${origin}/embed/${formId}" width="100%" height="600" frameborder="0"></iframe>`
-  const scriptCode = `<script src="${origin}/embed/${formId}.js" async></script>\n<div id="ai-form-${formId}"></div>`
+  const scriptCode = `<script src="${origin}/embed/${formId}/widget.js" async></script>\n<div id="ai-form-${formId}"></div>`
 
   async function handleCopyIframe() {
     await navigator.clipboard.writeText(iframeCode)
