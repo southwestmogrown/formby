@@ -21,7 +21,7 @@ export default function SignupForm() {
       email,
       password,
       options: {
-        emailRedirectTo: `${location.origin}/`,
+        emailRedirectTo: `${location.origin}/forms`,
       },
     })
 

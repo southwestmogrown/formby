@@ -8,10 +8,12 @@ export const metadata: Metadata = { title: 'My Forms' }
 
 export default async function Page() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: forms } = await supabase
     .from('forms')
     .select('*, submissions(count)')
+    .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
 
   const formList = (forms ?? []) as (Form & { submissions: [{ count: number }] })[]

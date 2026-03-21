@@ -9,9 +9,7 @@ import DemoBanner from '@/components/shared/DemoBanner'
 import Link from 'next/link'
 import {
   getDemoGenerationsUsed,
-  getDemoApiKey,
   incrementDemoUsage,
-  setDemoApiKey,
   canGenerate,
 } from '@/lib/demo'
 
@@ -23,7 +21,6 @@ export default function DemoPage() {
   const [fields, setFields] = useState<FormField[]>([])
   const [description, setDescription] = useState('')
   const [generationsUsed, setGenerationsUsed] = useState(0)
-  const [apiKey, setApiKey] = useState<string | null>(null)
   // mounted tracks whether client localStorage has been read
   const [mounted, setMounted] = useState(false)
 
@@ -33,21 +30,13 @@ export default function DemoPage() {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setGenerationsUsed(getDemoGenerationsUsed())
-    setApiKey(getDemoApiKey())
     setMounted(true)
   }, [])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  function handleApiKeyChange(key: string | null) {
-    setDemoApiKey(key)
-    setApiKey(key)
-  }
-
   function handleGenerate(newFields: FormField[], name: string, desc: string) {
-    if (!apiKey) {
-      incrementDemoUsage()
-      setGenerationsUsed(prev => prev + 1)
-    }
+    incrementDemoUsage()
+    setGenerationsUsed(prev => prev + 1)
     setFields(newFields)
     setFormName(name)
     setDescription(desc)
@@ -60,11 +49,7 @@ export default function DemoPage() {
     return (
       <div className="min-h-screen flex flex-col bg-surface">
         {mounted && (
-          <DemoBanner
-            generationsUsed={generationsUsed}
-            apiKey={apiKey}
-            onApiKeyChange={handleApiKeyChange}
-          />
+          <DemoBanner generationsUsed={generationsUsed} />
         )}
         <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
           <div className="w-full max-w-xl">
@@ -75,15 +60,14 @@ export default function DemoPage() {
             <PromptInput
               onGenerate={handleGenerate}
               initialDescription={description}
-              isDemo={!apiKey}
-              apiKey={apiKey ?? undefined}
+              isDemo
               demoGenerationsRemaining={mounted ? Math.max(0, 3 - generationsUsed) : 3}
               disabled={disabled}
             />
             {disabled && (
               <div className="mt-6 rounded-xl border border-border bg-white p-5 text-center">
                 <p className="text-ink font-medium mb-1">You&apos;ve used all 3 free generations</p>
-                <p className="text-sm text-ink-2 mb-4">Sign up free to keep building, or add your own Anthropic API key above.</p>
+                <p className="text-sm text-ink-2 mb-4">Sign up free to keep building with unlimited generations.</p>
                 <Link href="/signup" className="inline-block rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark transition-colors">
                   Create free account →
                 </Link>
@@ -98,11 +82,7 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {mounted && (
-        <DemoBanner
-          generationsUsed={generationsUsed}
-          apiKey={apiKey}
-          onApiKeyChange={handleApiKeyChange}
-        />
+        <DemoBanner generationsUsed={generationsUsed} />
       )}
 
       {/* Header bar */}
