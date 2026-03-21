@@ -296,6 +296,67 @@ Formby character = Gumby (warm grass green, rubbery, friendly) × Bill from Scho
 
 **Post-ship bug:** `Header.tsx` logo always linked to `'/'` — logged-in users clicking it hit the landing page. Fixed with `href={user ? '/forms' : '/'}`. Commit: `fix: logo links to /forms when logged in, / when logged out`
 
+### Issue #23 (M5+) — Auth page navigation + Demo mode + BYOK
+
+**What was built:**
+- `src/app/(auth)/layout.tsx` — shared auth layout with nav: Formby logo → `/`, "Try demo" → `/demo`
+- `src/app/demo/page.tsx` — public demo page at `/demo`:
+  - Two-phase: `empty` → `generated` after AI generation
+  - `DemoBanner` gated behind `mounted` state to avoid SSR/localStorage hydration mismatch
+  - Calls `incrementDemoUsage()` on generate (skipped when BYOK key is present)
+  - Shows "Sign up to save & publish →" CTA instead of Save/Publish buttons
+- `src/lib/demo.ts` — fully implemented (was empty stub):
+  - `DEMO_LIMIT = 3`, localStorage key `formby_demo_v1`
+  - Exports: `getDemoGenerationsUsed`, `getDemoApiKey`, `incrementDemoUsage`, `setDemoApiKey`, `canGenerate`, `generationsRemaining`
+- `src/components/shared/DemoBanner.tsx` — fully implemented (was empty stub):
+  - Shows remaining free generations or "✓ Using your API key · unlimited generations"
+  - Collapsible BYOK input: `type="password"`, `sk-ant-` prefix validation, accurate copy
+  - "Sign up free →" CTA
+- `src/app/api/generate/route.ts` — BYOK support:
+  - Destructures `apiKey` from request body
+  - Validates `sk-ant-` prefix, creates `new Anthropic({ apiKey })` when present
+  - Skips demo rate limiting when BYOK key is provided
+- `src/components/builder/PromptInput.tsx` — passes `apiKey` in fetch body
+- `src/lib/types.ts` — added `apiKey?: string` to `GenerateRequest`; removed stale `DemoSession` type
+
+**Key design decisions:**
+- BYOK key never stored server-side — received per-request and used inline only
+- In-memory `demoUsage` Map for rate limiting accepted as known serverless tradeoff (cold starts reset it)
+- `mounted` state pattern for localStorage reads prevents hydration errors
+- Banner copy: "sent to our API solely to make the Anthropic call on your behalf" (key goes through app's API route, not directly to Anthropic)
+
+**Review findings:**
+- 15 test failures after implementation (3 suites):
+  - `FormCard.test.tsx` (9): `DeleteFormButton` uses `useRouter()` — no `next/navigation` mock. Fix: added `vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }))`
+  - `api/forms/[id]/route.test.ts` (5): PUT and DELETE handlers chain two `.eq()` calls after adding `.eq('user_id', user.id)`. Mocks only handled one. Fix: updated mocks with double `.eq()` chains; DELETE mock now resolves `{ error: null, count: 1 }`
+  - `EmbedCodeBlock.test.tsx` (1): Test checked for `/embed/the-form-id.js` but component generates `/embed/the-form-id/widget.js`. Fix: updated test description and regex.
+- All 172 tests pass after fixes.
+
+**Commits:**
+- `feat: add demo mode, BYOK, and auth page navigation`
+
+### Post-ship fixes (after Issue #23)
+
+**Bug: Demo BYOK removed** — User feedback: demo should use server key only; users bring their own key when they sign up. Removed BYOK from demo page and DemoBanner entirely. DemoBanner simplified to generation count + signup CTA. Commit: `fix: remove BYOK from demo, harden forms query, fix signup redirect`
+
+**Bug: Signup confirmation email redirected to Prism** — Supabase Site URL was set to Prism's URL (shared project). `emailRedirectTo` pointed to `/` instead of `/forms`. Fixed redirect target. Disabled email confirmation entirely (Supabase single Site URL limitation). Signup now does hard redirect to `/forms` on success. Commit: `fix: remove email verification, redirect to /forms on signup`
+
+**Bug: New user saw other user's forms** — Forms list query had no explicit `user_id` filter, relied entirely on RLS which was not configured. Added `.eq('user_id', user.id)` as defense-in-depth. Also ran RLS policies in Supabase SQL editor:
+```sql
+ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage their own forms" ON forms FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Public can read published forms" ON forms FOR SELECT USING (published = true);
+ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Form owners can read submissions" ON submissions FOR SELECT USING (EXISTS (SELECT 1 FROM forms WHERE forms.id = submissions.form_id AND forms.user_id = auth.uid()));
+CREATE POLICY "Public can submit to published forms" ON submissions FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM forms WHERE forms.id = submissions.form_id AND forms.published = true));
+```
+
+**Feature: BYOK for authenticated users** — Authenticated users must supply their own Anthropic API key. `/api/generate` returns 400 for non-demo requests without one. `ApiKeyBanner` shown in dashboard until key is saved (localStorage keyed by `formby_apikey_${userId}`). `NewFormPage` refactored to server wrapper + client component to receive `userId`. Generate button disabled with explanatory message when no key stored. Commit: `feat: require BYOK for authenticated generate; add API key banner`
+
+**Feature: Modal-style auth pages** — Replaced sparse login/signup pages with modal overlay (dark `bg-ink/90` backdrop, centered white card, Formby logo + × dismiss button, demo footer link). Commit: `feat: replace auth pages with modal-style overlay`
+
+**Fix: Broken checkbox/radio layout in embed** — `input { display: block; width: 100% }` was catching `[type=checkbox]` and `[type=radio]`, making them full-width block elements detached from their labels. Fixed by scoping to `input:not([type=checkbox]):not([type=radio])`. Added `.options` (flex-col) and `.option-label` (flex align-center gap-8px) CSS classes. Hardened generate system prompt with "How Fields Render" section. Commit: `fix: repair checkbox/radio embed layout and harden generate prompt`
+
 ### Patterns established
 - Auth: `createClient()` → `getUser()` → 401 if null; no `user_id` filter (RLS handles ownership)
 - Errors: always `{ error: 'message' }` JSON
