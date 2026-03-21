@@ -10,7 +10,7 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          background: '#18181b',
+          background: '#3D8B4E',
           borderRadius: 6,
           display: 'flex',
           alignItems: 'center',

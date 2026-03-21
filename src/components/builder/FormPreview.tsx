@@ -7,7 +7,7 @@ interface FormPreviewProps {
 
 function FieldPreview({ field }: { field: FormField }) {
   const labelEl = (
-    <label className="block text-sm font-medium text-zinc-700 mb-1">
+    <label className="block text-sm font-medium text-ink-2 mb-1">
       {field.label}
       {field.required && (
         <span className="ml-1 text-red-500" aria-label="required">
@@ -18,11 +18,11 @@ function FieldPreview({ field }: { field: FormField }) {
   )
 
   const helpEl = field.helpText ? (
-    <p className="mt-1 text-xs text-zinc-400">{field.helpText}</p>
+    <p className="mt-1 text-xs text-ink-muted">{field.helpText}</p>
   ) : null
 
   const inputClass =
-    'block w-full rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 bg-zinc-50 focus:outline-none'
+    'block w-full rounded border border-border px-3 py-2 text-sm text-ink bg-surface focus:outline-none'
 
   let control: React.ReactNode
 
@@ -41,7 +41,7 @@ function FieldPreview({ field }: { field: FormField }) {
     case 'select':
       if (!field.options || field.options.length === 0) {
         control = (
-          <p className="text-xs text-zinc-400 italic">No options defined yet.</p>
+          <p className="text-xs text-ink-muted italic">No options defined yet.</p>
         )
       } else {
         control = (
@@ -60,14 +60,14 @@ function FieldPreview({ field }: { field: FormField }) {
     case 'radio':
       if (!field.options || field.options.length === 0) {
         control = (
-          <p className="text-xs text-zinc-400 italic">No options defined yet.</p>
+          <p className="text-xs text-ink-muted italic">No options defined yet.</p>
         )
       } else {
         control = (
           <div className="flex flex-col gap-1">
             {field.options.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 text-sm text-zinc-700">
-                <input type="radio" readOnly name={field.id} value={opt} className="accent-zinc-900" />
+              <label key={opt} className="flex items-center gap-2 text-sm text-ink-2">
+                <input type="radio" readOnly name={field.id} value={opt} className="accent-brand" />
                 {opt}
               </label>
             ))}
@@ -82,8 +82,8 @@ function FieldPreview({ field }: { field: FormField }) {
         control = (
           <div className="flex flex-col gap-1">
             {field.options.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 text-sm text-zinc-700">
-                <input type="checkbox" readOnly className="h-4 w-4 accent-zinc-900" />
+              <label key={opt} className="flex items-center gap-2 text-sm text-ink-2">
+                <input type="checkbox" readOnly className="h-4 w-4 accent-brand" />
                 {opt}
               </label>
             ))}
@@ -92,8 +92,8 @@ function FieldPreview({ field }: { field: FormField }) {
       } else {
         // Single checkbox — renders its own label so we skip the outer labelEl
         control = (
-          <label className="flex items-center gap-2 text-sm text-zinc-700">
-            <input type="checkbox" readOnly className="h-4 w-4 accent-zinc-900" />
+          <label className="flex items-center gap-2 text-sm text-ink-2">
+            <input type="checkbox" readOnly className="h-4 w-4 accent-brand" />
             {field.label}
             {field.required && (
               <span className="text-red-500" aria-label="required">*</span>
@@ -165,14 +165,14 @@ function FieldPreview({ field }: { field: FormField }) {
 
 export default function FormPreview({ fields, name }: FormPreviewProps) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-6">
+    <div className="rounded-lg border border-border bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-base font-semibold text-zinc-900">{name || 'Untitled Form'}</h2>
-        <span className="text-xs text-zinc-400 bg-zinc-100 rounded px-2 py-0.5">Preview only</span>
+        <h2 className="text-base font-semibold text-ink">{name || 'Untitled Form'}</h2>
+        <span className="text-xs text-brand bg-brand-light rounded px-2 py-0.5">Preview only</span>
       </div>
 
       {fields.length === 0 ? (
-        <p className="text-sm text-zinc-400 text-center py-8">
+        <p className="text-sm text-ink-muted text-center py-8">
           No fields yet. Generate or add a field to see the preview.
         </p>
       ) : (

@@ -69,8 +69,8 @@ export default function NewFormPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-xl">
-          <h1 className="text-2xl font-semibold text-zinc-900 mb-2">Create a new form</h1>
-          <p className="text-sm text-zinc-500 mb-8">
+          <h1 className="text-2xl font-semibold text-ink mb-2">Create a new form</h1>
+          <p className="text-sm text-ink-2 mb-8">
             Describe what your form should collect and we&apos;ll generate it instantly.
           </p>
           <PromptInput
@@ -85,11 +85,11 @@ export default function NewFormPage() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-3 bg-white min-h-[56px]">
+      <div className="flex items-center justify-between border-b border-border px-6 py-3 bg-white min-h-[56px]">
         <div className="flex items-center gap-3">
           <button
             onClick={handleRegenerate}
-            className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+            className="text-sm text-ink-muted hover:text-brand transition-colors"
           >
             ← Regenerate
           </button>
@@ -99,7 +99,7 @@ export default function NewFormPage() {
             onChange={(e) => setFormName(e.target.value)}
             placeholder="Form name"
             aria-label="Form name"
-            className="text-base font-semibold text-zinc-900 border-b border-transparent focus:border-zinc-300 focus:outline-none bg-transparent px-1"
+            className="text-base font-semibold text-ink border-b border-transparent focus:border-brand focus:outline-none bg-transparent px-1"
           />
         </div>
 
@@ -112,14 +112,14 @@ export default function NewFormPage() {
           <button
             onClick={() => handleSave(false)}
             disabled={savingAs !== null}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink-2 hover:bg-surface disabled:opacity-50 transition-colors"
           >
             {savingAs === 'draft' ? 'Saving…' : 'Save Draft'}
           </button>
           <button
             onClick={() => handleSave(true)}
             disabled={savingAs !== null}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors"
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
           >
             {savingAs === 'publish' ? 'Publishing…' : 'Publish'}
           </button>
@@ -128,12 +128,12 @@ export default function NewFormPage() {
 
       {/* Split layout: FieldList left, FormPreview right */}
       <div className="flex flex-col md:flex-row flex-1">
-        <div className="w-full md:w-1/2 overflow-y-auto border-b md:border-b-0 md:border-r border-zinc-200 p-4 md:p-6">
-          <h2 className="text-sm font-medium text-zinc-500 mb-4 uppercase tracking-wide">Fields</h2>
+        <div className="w-full md:w-1/2 overflow-y-auto border-b md:border-b-0 md:border-r border-border p-4 md:p-6">
+          <h2 className="text-sm font-medium text-ink-muted mb-4 uppercase tracking-wide">Fields</h2>
           <FieldList fields={fields} onChange={setFields} />
         </div>
-        <div className="w-full md:w-1/2 overflow-y-auto p-4 md:p-6 bg-zinc-50">
-          <h2 className="text-sm font-medium text-zinc-500 mb-4 uppercase tracking-wide">Preview</h2>
+        <div className="w-full md:w-1/2 overflow-y-auto p-4 md:p-6 bg-surface">
+          <h2 className="text-sm font-medium text-ink-muted mb-4 uppercase tracking-wide">Preview</h2>
           <FormPreview fields={fields} name={formName} />
         </div>
       </div>

@@ -16,8 +16,8 @@ export default function EmbedPageContent({ form }: EmbedPageContentProps) {
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-900">{form.name} — Embed</h1>
-        <Link href={`/forms/${form.id}`} className="text-sm text-zinc-500 hover:text-zinc-700">
+        <h1 className="text-xl font-semibold text-ink">{form.name} — Embed</h1>
+        <Link href={`/forms/${form.id}`} className="text-sm text-ink-muted hover:text-brand transition-colors">
           ← Back to editor
         </Link>
       </div>
@@ -29,12 +29,12 @@ export default function EmbedPageContent({ form }: EmbedPageContentProps) {
       )}
 
       <section>
-        <h2 className="text-base font-medium text-zinc-800 mb-3">Embed code</h2>
+        <h2 className="text-base font-medium text-ink-2 mb-3">Embed code</h2>
         <EmbedCodeBlock formId={form.id} />
       </section>
 
       <section>
-        <h2 className="text-base font-medium text-zinc-800 mb-3">Webhook</h2>
+        <h2 className="text-base font-medium text-ink-2 mb-3">Webhook</h2>
         <WebhookSettings
           formId={form.id}
           initialWebhookUrl={webhookUrl}
@@ -42,7 +42,7 @@ export default function EmbedPageContent({ form }: EmbedPageContentProps) {
         />
       </section>
 
-      <Link href={`/forms/${form.id}/submissions`} className="text-sm text-zinc-500 hover:text-zinc-700">
+      <Link href={`/forms/${form.id}/submissions`} className="text-sm text-ink-muted hover:text-brand transition-colors">
         View submissions →
       </Link>
     </div>

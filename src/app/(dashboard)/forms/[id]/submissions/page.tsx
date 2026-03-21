@@ -35,10 +35,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-700">← My Forms</Link>
-        <Link href={`/forms/${id}/embed`} className="text-sm text-zinc-500 hover:text-zinc-700">Embed settings</Link>
+        <Link href="/" className="text-sm text-ink-muted hover:text-brand transition-colors">← My Forms</Link>
+        <Link href={`/forms/${id}/embed`} className="text-sm text-ink-muted hover:text-brand transition-colors">Embed settings</Link>
       </div>
-      <h1 className="text-2xl font-bold text-zinc-900 mb-6">{form.name} — Submissions</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">{form.name} — Submissions</h1>
       <SubmissionsPageContent form={form as Form} submissions={(submissions ?? []) as Submission[]} />
     </div>
   )

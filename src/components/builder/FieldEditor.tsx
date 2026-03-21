@@ -52,16 +52,16 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4 flex flex-col gap-3">
+    <div className="rounded-lg border border-border bg-white p-4 flex flex-col gap-3">
       <div className="flex gap-3 items-start">
         {/* Type selector */}
         <div className="flex flex-col gap-1 w-40 shrink-0">
-          <label className="text-xs font-medium text-zinc-500">Type</label>
+          <label className="text-xs font-medium text-ink-2">Type</label>
           <select
             value={field.type}
             onChange={(e) => handleTypeChange(e.target.value as FieldType)}
             aria-label="Field type"
-            className="rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           >
             {FIELD_TYPES.map(({ value, label }) => (
               <option key={value} value={value}>
@@ -73,26 +73,26 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
 
         {/* Label */}
         <div className="flex flex-col gap-1 flex-1">
-          <label className="text-xs font-medium text-zinc-500">Label</label>
+          <label className="text-xs font-medium text-ink-2">Label</label>
           <input
             type="text"
             value={field.label}
             onChange={(e) => update({ label: e.target.value })}
             placeholder="Field label"
             aria-label="Field label"
-            className="rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           />
         </div>
 
         {/* Required toggle */}
         <div className="flex flex-col gap-1 items-center shrink-0">
-          <label className="text-xs font-medium text-zinc-500">Required</label>
+          <label className="text-xs font-medium text-ink-2">Required</label>
           <input
             type="checkbox"
             checked={field.required}
             onChange={(e) => update({ required: e.target.checked })}
             aria-label="Required"
-            className="h-4 w-4 rounded accent-zinc-900 mt-1.5"
+            className="h-4 w-4 rounded accent-brand mt-1.5"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
         <button
           onClick={onDelete}
           aria-label="Delete field"
-          className="shrink-0 mt-5 rounded p-1 text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          className="shrink-0 mt-5 rounded p-1 text-ink-muted hover:text-red-500 hover:bg-red-50 transition-colors"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
             <path
@@ -115,14 +115,14 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
       {/* Placeholder — only for compatible types */}
       {showPlaceholder && (
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-500">Placeholder</label>
+          <label className="text-xs font-medium text-ink-2">Placeholder</label>
           <input
             type="text"
             value={field.placeholder ?? ''}
             onChange={(e) => update({ placeholder: e.target.value || undefined })}
             placeholder="Placeholder text"
             aria-label="Placeholder text"
-            className="rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           />
         </div>
       )}
@@ -130,8 +130,8 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
       {/* Options — only for select/radio/checkbox */}
       {showOptions && (
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-500">
-            Options <span className="font-normal text-zinc-400">(comma-separated)</span>
+          <label className="text-xs font-medium text-ink-2">
+            Options <span className="font-normal text-ink-muted">(comma-separated)</span>
           </label>
           <input
             type="text"
@@ -139,7 +139,7 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
             onChange={(e) => handleOptionsChange(e.target.value)}
             placeholder="Option 1, Option 2, Option 3"
             aria-label="Options"
-            className="rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           />
         </div>
       )}
@@ -148,13 +148,13 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
       {showHelpText ? (
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-zinc-500">Help text</label>
+            <label className="text-xs font-medium text-ink-2">Help text</label>
             <button
               onClick={() => {
                 setShowHelpText(false)
                 update({ helpText: undefined })
               }}
-              className="text-xs text-zinc-400 hover:text-zinc-600"
+              className="text-xs text-ink-muted hover:text-ink-2"
               aria-label="Remove help text"
             >
               Remove
@@ -166,13 +166,13 @@ export default function FieldEditor({ field, onChange, onDelete }: FieldEditorPr
             onChange={(e) => update({ helpText: e.target.value || undefined })}
             placeholder="Shown below the field"
             aria-label="Help text"
-            className="rounded border border-zinc-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
           />
         </div>
       ) : (
         <button
           onClick={() => setShowHelpText(true)}
-          className="self-start text-xs text-zinc-400 hover:text-zinc-600 underline underline-offset-2"
+          className="self-start text-xs text-ink-muted hover:text-ink-2 underline underline-offset-2"
           aria-label="Add help text"
         >
           + Add help text

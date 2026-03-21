@@ -44,7 +44,7 @@ export default function SubmissionsPageContent({ form, submissions }: Submission
         <button
           onClick={handleExportCSV}
           disabled={submissions.length === 0}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="rounded-lg border border-brand text-brand px-4 py-2 text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Export CSV
         </button>

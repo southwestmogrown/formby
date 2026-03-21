@@ -61,7 +61,7 @@ export default function PromptInput({
   return (
     <div className="flex flex-col gap-4 w-full">
       {isDemo && demoGenerationsRemaining !== undefined && (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-ink-muted">
           {demoGenerationsRemaining} generation{demoGenerationsRemaining !== 1 ? 's' : ''} remaining in demo
         </p>
       )}
@@ -72,7 +72,7 @@ export default function PromptInput({
         placeholder="Describe your form in plain English… e.g. 'A contact form with name, email, phone, and a message field'"
         rows={4}
         disabled={disabled || isLoading}
-        className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-zinc-900 disabled:opacity-50"
+        className="w-full rounded-lg border border-border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-50"
       />
 
       {error && (
@@ -85,7 +85,7 @@ export default function PromptInput({
         onClick={handleGenerate}
         disabled={!canGenerate}
         aria-busy={isLoading}
-        className="self-end flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-zinc-700 transition-colors min-w-[150px]"
+        className="self-end flex items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-brand-dark transition-colors min-w-[150px]"
       >
         {isLoading ? (
           <>
@@ -122,7 +122,7 @@ export default function PromptInput({
             key={prompt}
             onClick={() => setDescription(prompt)}
             disabled={disabled || isLoading}
-            className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 transition-colors disabled:opacity-40"
+            className="rounded-full border border-border px-3 py-1 text-xs text-ink-2 hover:border-brand hover:text-brand transition-colors disabled:opacity-40"
           >
             {prompt}
           </button>

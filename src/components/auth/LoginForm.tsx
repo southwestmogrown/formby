@@ -32,10 +32,10 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
-      <h1 className="text-2xl font-semibold">Log in</h1>
+      <h1 className="text-2xl font-semibold text-ink">Log in</h1>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium">Email</label>
+        <label htmlFor="email" className="text-sm font-medium text-ink-2">Email</label>
         <input
           id="email"
           type="email"
@@ -43,12 +43,12 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="border rounded px-3 py-2 text-sm"
+          className="border border-border focus:outline-none focus:ring-2 focus:ring-brand rounded-lg px-3 py-2 text-sm"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">Password</label>
+        <label htmlFor="password" className="text-sm font-medium text-ink-2">Password</label>
         <input
           id="password"
           type="password"
@@ -56,7 +56,7 @@ export default function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
-          className="border rounded px-3 py-2 text-sm"
+          className="border border-border focus:outline-none focus:ring-2 focus:ring-brand rounded-lg px-3 py-2 text-sm"
         />
       </div>
 
@@ -67,14 +67,14 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-black text-white rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+        className="bg-brand hover:bg-brand-dark text-white rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
       >
         {isLoading ? 'Logging in…' : 'Log in'}
       </button>
 
-      <p className="text-sm text-center text-gray-500">
+      <p className="text-sm text-center text-ink-muted">
         Don&apos;t have an account?{' '}
-        <Link href="/signup" className="underline">Sign up</Link>
+        <Link href="/signup" className="text-brand hover:text-brand-dark">Sign up</Link>
       </p>
     </form>
   )

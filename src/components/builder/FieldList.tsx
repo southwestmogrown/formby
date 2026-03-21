@@ -84,7 +84,7 @@ export default function FieldList({ fields, onChange }: FieldListProps) {
             onDragEnd={handleDragEnd}
             role="button"
             aria-label="Drag to reorder"
-            className="mt-4 cursor-grab text-zinc-300 hover:text-zinc-500 shrink-0 select-none"
+            className="mt-4 cursor-grab text-border hover:text-ink-muted shrink-0 select-none"
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden="true">
               <path d="M7 2a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM7 8a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zm-6 6a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z" />
@@ -103,7 +103,7 @@ export default function FieldList({ fields, onChange }: FieldListProps) {
 
       <button
         onClick={handleAddField}
-        className="flex items-center gap-2 rounded-lg border border-dashed border-zinc-300 px-4 py-3 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+        className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-ink-muted hover:border-brand hover:text-brand transition-colors"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
           <path

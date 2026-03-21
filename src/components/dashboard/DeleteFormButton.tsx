@@ -60,7 +60,7 @@ export default function DeleteFormButton({ formId, formName }: Props) {
           onClick={() => { setConfirming(false); setError(null) }}
           disabled={deleting}
           aria-label={`Cancel delete ${formName}`}
-          className="text-zinc-400 hover:underline"
+          className="text-ink-muted hover:underline"
         >
           Cancel
         </button>
@@ -73,7 +73,7 @@ export default function DeleteFormButton({ formId, formName }: Props) {
       type="button"
       onClick={() => setConfirming(true)}
       aria-label={`Delete ${formName}`}
-      className="text-zinc-400 hover:text-red-600 hover:underline font-medium transition-colors"
+      className="text-ink-muted hover:text-red-600 hover:underline font-medium transition-colors"
     >
       Delete
     </button>

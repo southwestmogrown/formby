@@ -7,13 +7,13 @@ export default async function Header() {
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <header className="border-b border-zinc-200 bg-white px-6 py-3 flex items-center justify-between">
-      <Link href="/" className="text-sm font-bold text-zinc-900">
+    <header className="border-b border-border bg-white px-6 py-3 flex items-center justify-between">
+      <Link href="/" className="text-lg font-bold text-brand hover:text-brand-dark transition-colors">
         Formby
       </Link>
       {user && (
         <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-500">{user.email}</span>
+          <span className="text-sm text-ink-muted">{user.email}</span>
           <SignOutButton />
         </div>
       )}

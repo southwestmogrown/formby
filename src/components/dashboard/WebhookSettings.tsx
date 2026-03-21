@@ -55,7 +55,7 @@ export default function WebhookSettings({ formId, initialWebhookUrl, onSave }: W
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="webhook-url" className="text-sm font-medium text-zinc-700">
+        <label htmlFor="webhook-url" className="text-sm font-medium text-ink-2">
           Webhook URL
         </label>
         <input
@@ -64,7 +64,7 @@ export default function WebhookSettings({ formId, initialWebhookUrl, onSave }: W
           value={webhookUrl}
           onChange={(e) => setWebhookUrl(e.target.value)}
           placeholder="https://..."
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
         />
       </div>
 
@@ -72,14 +72,14 @@ export default function WebhookSettings({ formId, initialWebhookUrl, onSave }: W
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
         >
           {saveStatus === 'saving' ? 'Saving...' : 'Save'}
         </button>
         <button
           onClick={handleTest}
           disabled={testStatus === 'testing' || webhookUrl === ''}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink-2 hover:bg-surface disabled:opacity-50 transition-colors"
         >
           {testStatus === 'testing' ? 'Testing...' : 'Test'}
         </button>
@@ -87,7 +87,7 @@ export default function WebhookSettings({ formId, initialWebhookUrl, onSave }: W
 
       <div className="flex flex-col gap-1">
         {saveStatus === 'saved' && (
-          <p className="text-sm text-green-600">Saved!</p>
+          <p className="text-sm text-brand">Saved!</p>
         )}
         {saveStatus === 'error' && (
           <p className="text-sm text-red-600">Error saving</p>

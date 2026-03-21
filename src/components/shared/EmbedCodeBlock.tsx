@@ -30,7 +30,7 @@ export default function EmbedCodeBlock({ formId }: EmbedCodeBlockProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-zinc-700">iframe embed</h3>
+        <h3 className="text-sm font-medium text-ink-2">iframe embed</h3>
         <pre
           style={{
             backgroundColor: '#1e1e1e',
@@ -45,14 +45,14 @@ export default function EmbedCodeBlock({ formId }: EmbedCodeBlockProps) {
         </pre>
         <button
           onClick={handleCopyIframe}
-          className="self-start rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+          className="self-start rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-brand-light hover:border-brand hover:text-brand transition-colors"
         >
           {iframeCopied ? 'Copied!' : 'Copy'}
         </button>
       </div>
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-zinc-700">Script tag</h3>
+        <h3 className="text-sm font-medium text-ink-2">Script tag</h3>
         <pre
           style={{
             backgroundColor: '#1e1e1e',
@@ -67,7 +67,7 @@ export default function EmbedCodeBlock({ formId }: EmbedCodeBlockProps) {
         </pre>
         <button
           onClick={handleCopyScript}
-          className="self-start rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+          className="self-start rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-brand-light hover:border-brand hover:text-brand transition-colors"
         >
           {scriptCopied ? 'Copied!' : 'Copy'}
         </button>
